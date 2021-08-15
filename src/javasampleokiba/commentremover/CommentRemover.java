@@ -12,39 +12,39 @@ import javasampleokiba.commentremover.policy.CustomCommentRemovePolicy;
 import javasampleokiba.commentremover.policy.CommentRemovePolicy;
 
 /**
- * �\�[�X�R�����g�̈ꊇ�폜����ђ��o���s���N���X.
+ * ソースコメントの一括削除および抽出を行うクラス.
  *
- * <p>[��̓A���S���Y��]</p>
+ * <p>[解析アルゴリズム]</p>
  * <ul>
- * <li>�R�����g�̊J�n��\��������i�ȉ��A�R�����g�J�n������j���s�̒��Ō��o���ꂽ�ꍇ�ɁA
- * ���̕���������̕����i�����s�R�����g�̏ꍇ�͎��̍s�ȍ~���j���R�����g�Ƃ݂Ȃ��܂��B</li>
- * <li>1�s�ɕ����̃R�����g�J�n�����񂪑��݂���ꍇ�́A�ł��擪�̂��̂��R�����g�J�n������Ɖ��߂��܂��B</li>
- * <li>�R�����g�J�n�����񂪕�����`����Ă���ꍇ�́A�Œ��}�b�`���D��ł��B�Ⴆ�΁A/**��/*�����D�悵�Č��o����܂��B</li>
- * <li>�R�����g�̊J�n�܂��͏I����\��������i�ȉ��A�R�����g������j�͑啶������������ʂ���܂��B</li>
- * <li>���p���ň͂܂ꂽ���e���������񒆂Ɍ����R�����g������́A�R�����g������Ƃ݂Ȃ�����������܂��B</li>
- * <li>���e���������񒆂̃o�b�N�X���b�V���ɂ����p���̃G�X�P�[�v�ɑΉ����Ă��܂��B</li>
- * <li>���ꖈ�ɕ��@�I�ɐ��������ɂ��Ă͌��m���܂���B�Ⴆ�΁A�R�����g�J�n������͍s���ɂȂ��Ă͂Ȃ�Ȃ��Ƃ�������d�l���������Ƃ��Ă��A
- * �s�̓r���Ō��o�����΂���̓R�����g�J�n������Ƃ݂Ȃ��܂��B</li>
- * <li>�e�L�X�g�̏I���܂ŃR�����g�I��������A���邢�͕��̈��p����������Ȃ��ꍇ�́A���s���G���[�ƂȂ�܂��B</li>
+ * <li>コメントの開始を表す文字列（以下、コメント開始文字列）が行の中で検出された場合に、
+ * その文字列より後ろの部分（複数行コメントの場合は次の行以降も）をコメントとみなします。</li>
+ * <li>1行に複数のコメント開始文字列が存在する場合は、最も先頭のものをコメント開始文字列と解釈します。</li>
+ * <li>コメント開始文字列が複数定義されている場合は、最長マッチが優先です。例えば、/**は/*よりも優先して検出されます。</li>
+ * <li>コメントの開始または終了を表す文字列（以下、コメント文字列）は大文字小文字が区別されます。</li>
+ * <li>引用符で囲まれたリテラル文字列中に現れるコメント文字列は、コメント文字列とみなさず無視されます。</li>
+ * <li>リテラル文字列中のバックスラッシュによる引用符のエスケープに対応しています。</li>
+ * <li>言語毎に文法的に正しいかについては検知しません。例えば、コメント開始文字列は行頭になくてはならないという言語仕様があったとしても、
+ * 行の途中で検出されればそれはコメント開始文字列とみなします。</li>
+ * <li>テキストの終了までコメント終了文字列、あるいは閉じの引用符が見つからない場合は、実行時エラーとなります。</li>
  * </ul>
  *
- * <p>[��������]</p>
+ * <p>[制限事項]</p>
  * <ul>
- * <li>�q�A�h�L�������g�ɂ͑Ή����Ă��Ȃ����߁A�q�A�h�L�������g���ł��R�����g�����񂪌��o����܂��B</li>
- * <li>���ꖈ�̈��p���ȊO�ɂ�����ȃ��e����������ɂ͑Ή����Ă��Ȃ����߁A����烊�e���������񒆂ł��R�����g�����񂪌��o����܂��B</li>
- * <li>�R�����g�J�n������ɑ��������񂪉��ł��낤�ƃR�����g�Ƃ݂Ȃ����߁A�Ⴆ��PHP�̏ꍇ�A
- * �R�����g�s�̓r���ɃR�[�h�I���^�O?>������ꍇ�ł��s���܂ŃR�����g�Ƃ݂Ȃ���܂��B</li>
- * <li>��L�̕ʂ̐�����Ƃ��āA�Ⴆ��VB��rem���R�����g�J�n������Ƃ��Ē�`����ꍇ�A
- * "rem "�Ȃǂ̂悤�ɋ󔒕�����t�^����K�v������܂��i�����łȂ���remxxx�̂悤�ȕ�������R�����g�ł���Ƃ݂Ȃ���邽�߁j�B</li>
+ * <li>ヒアドキュメントには対応していないため、ヒアドキュメント中でもコメント文字列が検出されます。</li>
+ * <li>言語毎の引用符以外による特殊なリテラル文字列には対応していないため、上手く処理できない可能性があります。</li>
+ * <li>コメント開始文字列に続く文字列が何であろうとコメントとみなすため、例えばPHPの場合、
+ * コメント行の途中にコード終了タグ?>がある場合でも行末までコメントとみなされます。</li>
+ * <li>上記の別の制限例として、例えばVBのremをコメント開始文字列として定義する場合、
+ * "rem "などのように空白文字を付与する必要があります（そうでないとremxxxのような文字列もコメントであるとみなされるため）。</li>
  * </ul>
  */
 public class CommentRemover {
 
-    /** �������[�h */
+    /** 処理モード */
     public enum Mode {
-        /** �R�����g�폜 */
+        /** コメント削除 */
         REMOVE,
-        /** �R�����g���o */
+        /** コメント抽出 */
         EXTRACT,
     }
 
@@ -52,12 +52,12 @@ public class CommentRemover {
     }
 
     /**
-     * �w�肳�ꂽ�e�L�X�g�f�[�^����A�w�肳�ꂽ�|���V�[�ɏ]���āA�R�����g���폜���܂��B
+     * 指定されたテキストデータから、指定されたポリシーに従って、コメントを削除します。
      * 
-     * @param lines   �e�L�X�g�f�[�^
-     * @param policy  �R�����g�폜�|���V�[
-     * @return �R�����g�폜��̃e�L�X�g�f�[�^
-     * @throws ParseException  ��̓G���[�����������ꍇ
+     * @param lines   テキストデータ
+     * @param policy  コメント削除ポリシー
+     * @return コメント削除後のテキストデータ
+     * @throws ParseException  解析エラーが発生した場合
      */
     public static List<String> remove(List<String> lines, CommentRemovePolicy policy)
             throws ParseException {
@@ -65,13 +65,13 @@ public class CommentRemover {
     }
 
     /**
-     * �w�肳�ꂽ�e�L�X�g�f�[�^����A�w�肳�ꂽ�|���V�[�ɏ]���āA�R�����g�𒊏o���܂��B
-     * �܂�A{@link #remove(List, CommentRemovePolicy)}�Ƃ͋t�ɁA�R�����g�ȊO�����ׂč폜���܂��B
+     * 指定されたテキストデータから、指定されたポリシーに従って、コメントを抽出します。
+     * つまり、{@link #remove(List, CommentRemovePolicy)}とは逆に、コメント以外をすべて削除します。
      * 
-     * @param lines   �e�L�X�g�f�[�^
-     * @param policy  �R�����g�폜�|���V�[
-     * @return �R�����g���o��̃e�L�X�g�f�[�^
-     * @throws ParseException  ��̓G���[�����������ꍇ
+     * @param lines   テキストデータ
+     * @param policy  コメント削除ポリシー
+     * @return コメント抽出後のテキストデータ
+     * @throws ParseException  解析エラーが発生した場合
      */
     public static List<String> extract(List<String> lines, CommentRemovePolicy policy)
             throws ParseException {
@@ -79,34 +79,34 @@ public class CommentRemover {
     }
 
     /**
-     * �w�肳�ꂽ�e�L�X�g�f�[�^����A�w�肳�ꂽ�|���V�[�ɏ]���āA�R�����g���폜�܂��͒��o���܂��B
+     * 指定されたテキストデータから、指定されたポリシーに従って、コメントを削除または抽出します。
      * 
-     * @param lines   �e�L�X�g�f�[�^
-     * @param policy  �R�����g�폜�|���V�[
-     * @param mode    �������[�h
-     * @return �R�����g�폜�܂��͒��o��̃e�L�X�g�f�[�^
+     * @param lines   テキストデータ
+     * @param policy  コメント削除ポリシー
+     * @param mode    処理モード
+     * @return コメント削除または抽出後のテキストデータ
      * @see Mode
-     * @throws IllegalArgumentException  �|���V�[�̐ݒ肪�s���ȏꍇ
-     * @throws ParseException  ��̓G���[�����������ꍇ
+     * @throws IllegalArgumentException  ポリシーの設定が不正な場合
+     * @throws ParseException  解析エラーが発生した場合
      */
     public static List<String> execute(List<String> lines, CommentRemovePolicy policy, Mode mode)
             throws ParseException {
-        // �R�����g�폜�|���V�[���`�F�b�N
+        // コメント削除ポリシーをチェック
         checkPolicy(policy);
-        // �R�����g�폜�|���V�[�𐳏퉻
+        // コメント削除ポリシーを正常化
         CommentRemovePolicy normalizedPolicy = normalizedPolicy(policy);
 
         List<CodeParser> allParsers = new ArrayList<CodeParser>();
         List<String> result = new ArrayList<String>();
 
-        // ���
+        // 解析
         CodeParser parser = new CodeParser(lines, new CodePosition(0, 0), normalizedPolicy);
         do {
             allParsers.add(parser);
             parser = parser.next();
         } while(parser != null);
 
-        // ��͌��ʂ���R�����g�폜 or ���o
+        // 解析結果からコメント削除 or 抽出
         for (int i = 0; i < lines.size(); i++) {
             int row = i;
             List<CodeParser> parsers = allParsers.stream()
@@ -120,7 +120,7 @@ public class CommentRemover {
                 removed |= e.getValue();
             }
 
-            // �ǉ��Ώۂ̃f�[�^�ł���Ό��ʂɊi�[
+            // 追加対象のデータであれば結果に格納
             String line = sb.toString();
             if (willAdd(line, removed, normalizedPolicy)) {
                 result.add(line);
@@ -135,15 +135,15 @@ public class CommentRemover {
         String[] endComments = policy.getMultiLineCommentEnd();
 
         if (beginComments != null ^ endComments != null) {
-            throw new IllegalArgumentException("�R�����g�J�n������ƃR�����g�I��������̕Е�������L���ɂ��邱�Ƃ͂ł��܂���B");
+            throw new IllegalArgumentException("コメント開始文字列とコメント終了文字列の片方だけを有効にすることはできません。");
 
         } else if (beginComments != null && endComments != null) {
             if (beginComments.length != endComments.length) {
-                throw new IllegalArgumentException("�R�����g�J�n������ƃR�����g�I��������̐����قȂ�܂��B");
+                throw new IllegalArgumentException("コメント開始文字列とコメント終了文字列の数が異なります。");
             }
             for (int i = 0; i < beginComments.length; i++) {
                 if (isValid(beginComments[i]) ^ isValid(endComments[i])) {
-                    throw new IllegalArgumentException("�R�����g�J�n������ƃR�����g�I��������̕Е�������L���ɂ��邱�Ƃ͂ł��܂���B");
+                    throw new IllegalArgumentException("コメント開始文字列とコメント終了文字列の片方だけを有効にすることはできません。");
                 }
             }
         }
@@ -161,8 +161,8 @@ public class CommentRemover {
         boolean found;
 
         /*
-         * �R�����g������A�R�����g�J�n�����񂪕�����`����Ă���ꍇ�A���Ԃ𐮂���B
-         * �Ⴆ�΁A/*�A/**�̏ꍇ��/**����Ɍ��������悤�ɂ��邽�߁A/*�����O�Ɉړ��B
+         * コメント文字列、コメント開始文字列が複数定義されている場合、順番を整える。
+         * 例えば、/*、/**の場合は/**が先に検索されるようにするため、/*よりも前に移動。
          */
         if (comments != null) {
             do {
@@ -207,18 +207,18 @@ public class CommentRemover {
     }
 
     private static boolean willAdd(String line, boolean removed, CommentRemovePolicy policy) {
-        // �폜���s���Ă��Ȃ��ꍇ
+        // 削除を行っていない場合
         if (!removed) {
             return true;
         }
 
-        // ��s���폜����ݒ�A����s�̏ꍇ
+        // 空行を削除する設定、かつ空行の場合
         if (policy.isEnabledRemoveEmptyLine() &&
                 line.equals("")) {
             return false;
         }
 
-        // �󔒍s���폜����ݒ�A���󔒍s�̏ꍇ
+        // 空白行を削除する設定、かつ空白行の場合
         if (policy.isEnabledRemoveBlankLine() &&
                 policy.getBlankPattern() != null &&
                 policy.getBlankPattern().matcher(line).matches()) {
